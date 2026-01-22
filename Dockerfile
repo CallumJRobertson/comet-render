@@ -9,7 +9,7 @@ WORKDIR /app
 
 # Clone the latest Comet code directly from the developer
 # (This ensures you get the official app, not a custom modified version)
-RUN git clone --depth 1 --branch main https://github.com/g0ldyy/comet .
+RUN git clone --depth 1 --branch main https://github.com/CallumJRobertson/comet-fork .
 
 # Install dependencies
 RUN pip install --no-cache-dir .
