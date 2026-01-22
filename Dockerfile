@@ -1,23 +1,28 @@
-FROM python:3.11-slim
+# 1. Start with the developer's pre-built image
+# (This image already has Python, Cryptography, and all heavy libraries installed)
+FROM ghcr.io/g0ldyy/comet:latest
 
-# 1. Install git and basic tools
-RUN apt-get update && apt-get install -y git build-essential && rm -rf /var/lib/apt/lists/*
+# Switch to root user to allow file changes
+USER root
 
-# 2. Install 'uv' (The fix for OOM errors)
-# 'uv' is much more memory efficient than 'pip' and won't crash the free tier
-RUN pip install uv
+# 2. Install git
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 
+# 3. Swap the code
 WORKDIR /app
 
-# 3. Clone YOUR fork
+# Delete the original code
+RUN rm -rf ./*
+
+# Download YOUR fork (with the custom titles)
 RUN git clone --depth 1 --branch main https://github.com/CallumJRobertson/comet-fork .
 
-# 4. Delete the conflicting folder (Crucial for your fork)
+# Delete the folder that causes errors
 RUN rm -rf deployment
 
-# 5. Install dependencies using 'uv' instead of 'pip'
-# --system tells it to install to the main python environment
-RUN uv pip install --system --no-cache -r requirements.txt || uv pip install --system --no-cache .
+# 4. Install just your package code (Skip checking heavy dependencies)
+# We use --no-deps so pip doesn't check the heavy libraries and crash the memory
+RUN pip install --no-cache-dir --no-deps .
 
-# 6. Start the app
+# 5. Start the app
 CMD ["python", "-m", "comet.main"]
